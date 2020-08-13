@@ -64,10 +64,8 @@ const App: React.FC = () => {
     )
   } else {
     const { issueId } = currentDisplay
-    const key = `${org}/${repo}/${issueId}`
     content = (
       <IssueDetailsPage
-        key={key}
         org={org}
         repo={repo}
         issueId={issueId}
