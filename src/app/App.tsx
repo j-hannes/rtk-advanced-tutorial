@@ -1,12 +1,17 @@
-import React, { useState } from 'react'
-import './App.css'
+import React from 'react'
+import { useSelector, useDispatch } from 'react-redux'
 
 import { RepoSearchForm } from 'features/repoSearch/RepoSearchForm'
 import { IssuesListPage } from 'features/issuesList/IssuesListPage'
 import { IssueDetailsPage } from 'features/issueDetails/IssueDetailsPage'
+import {
+  displayRepo,
+  setCurrentDisplayType,
+  setCurrentPage
+} from 'features/issuesDisplay/issuesDisplaySlice'
 
-const ORG = 'rails'
-const REPO = 'rails'
+import { RootState } from './rootReducer'
+import './App.css'
 
 type CurrentDisplay =
   | {
@@ -18,33 +23,30 @@ type CurrentDisplay =
     }
 
 const App: React.FC = () => {
-  const [org, setOrg] = useState(ORG)
-  const [repo, setRepo] = useState(REPO)
-  const [page, setPage] = useState(1)
-  const [currentDisplay, setCurrentDisplay] = useState<CurrentDisplay>({
-    type: 'issues'
-  })
+  const dispatch = useDispatch()
+  const { org, repo, displayType, page, issueId } = useSelector(
+    (state: RootState) => state.issuesDisplay
+  )
 
   const setOrgAndRepo = (org: string, repo: string) => {
-    setOrg(org)
-    setRepo(repo)
+    dispatch(displayRepo({ org, repo }))
   }
 
   const setJumpToPage = (page: number) => {
-    setPage(page)
+    dispatch(setCurrentPage(page))
   }
 
   const showIssuesList = () => {
-    setCurrentDisplay({ type: 'issues' })
+    dispatch(setCurrentDisplayType({ displayType: 'issues' }))
   }
 
   const showIssueComments = (issueId: number) => {
-    setCurrentDisplay({ type: 'comments', issueId })
+    dispatch(setCurrentDisplayType({ displayType: 'comments', issueId }))
   }
 
   let content
 
-  if (currentDisplay.type === 'issues') {
+  if (displayType === 'issues') {
     content = (
       <React.Fragment>
         <RepoSearchForm
@@ -63,12 +65,11 @@ const App: React.FC = () => {
       </React.Fragment>
     )
   } else {
-    const { issueId } = currentDisplay
     content = (
       <IssueDetailsPage
         org={org}
         repo={repo}
-        issueId={issueId}
+        issueId={issueId || 0}
         showIssuesList={showIssuesList}
       />
     )
